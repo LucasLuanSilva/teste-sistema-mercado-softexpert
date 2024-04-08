@@ -1,0 +1,1 @@
+{"version":1,"defects":{"ProdutoTest::testAddSuccess":4,"ProdutoTest::testAddFailure":3},"times":{"ProdutoTest::testAddSuccess":0.162,"ProdutoTest::testAddFailure":0.13}}

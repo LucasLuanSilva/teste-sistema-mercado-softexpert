@@ -19,7 +19,7 @@ class ProdutoController {
         try {
             self::validaParametros($body, $pdo);
         } catch(\Exception $e) {
-            throw new Exception('Informe parâmetros válidos', 400);
+            throw new \Exception('Informe parâmetros válidos', 400);
         }
 
 
@@ -30,7 +30,7 @@ class ProdutoController {
             $sth->bindValue('valor', $body['valor']);
             $sth->execute();
         } catch(\PDOException $e) {
-            return $e->getMessage();
+            throw new \Exception($e->getMessage(), 400);
         }
 
         $result = $pdo->lastInsertId();
@@ -52,7 +52,7 @@ class ProdutoController {
 
             self::validaParametros($body, $pdo);
         } catch(\Exception $e) {
-            throw new Exception('Informe parâmetros válidos', 400);
+            throw new \Exception('Informe parâmetros válidos', 400);
         }
 
 
@@ -64,7 +64,7 @@ class ProdutoController {
             $sth->bindValue('valor', $body['valor']);
             $sth->execute();
         } catch(\PDOException $e) {
-            return $e->getMessage();
+            throw new \Exception($e->getMessage(), 400);
         }
 
         if ($sth->rowCount() > 0) {
@@ -86,7 +86,7 @@ class ProdutoController {
                 return "Informe um código";
             }
         } catch(\Exception $e) {
-            throw new Exception('Erro ao validar parâmetros', 400);
+            throw new \Exception('Erro ao validar parâmetros', 400);
         }
 
 
@@ -95,7 +95,7 @@ class ProdutoController {
             $sth->bindValue('codigo', $query['codigo']);
             $sth->execute();
         } catch(\PDOException $e) {
-            return $e->getMessage();
+            throw new \Exception($e->getMessage(), 400);
         }
 
         if ($sth->rowCount() > 0) {
@@ -118,7 +118,7 @@ class ProdutoController {
         try {
             $sth->execute();
         } catch(\PDOException $e) {
-            return $e->getMessage();
+            throw new \Exception($e->getMessage(), 400);
         }
 
         $result = $sth->fetchAll();
@@ -133,7 +133,7 @@ class ProdutoController {
                 $sth->bindValue('codigo_tipo', $body['codigo_tipo']);
                 $sth->execute();
             } catch(\PDOException $e) {
-                return $e->getMessage();
+                throw new \Exception($e->getMessage(), 400);
             }
 
             if (!($sth->rowCount() > 0)) {
@@ -148,7 +148,7 @@ class ProdutoController {
                 return "Informe o valor do produto";
             }
         } catch(\Exception $e) {
-            throw new Exception('Informe parâmetros válidos', 400);
+            throw new \Exception('Informe parâmetros válidos', 400);
         }
     }
 }
