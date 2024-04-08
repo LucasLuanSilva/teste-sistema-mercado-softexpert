@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use \App\Http\Request;
-use \App\Model\TipoProduto;
+use \App\Model\Produto;
 
-class TipoProdutoController {
+class ProdutoController {
 
     public static function add() {
         $pdo = \App\Persistence\ConnectionCreator::createConnection();
@@ -17,16 +17,17 @@ class TipoProdutoController {
         $body = $request->getBody();
 
         try {
-            self::validaParametros($body);
+            self::validaParametros($body, $pdo);
         } catch(\Exception $e) {
             throw new Exception('Informe parâmetros válidos', 400);
         }
 
 
-        $sth = $pdo->prepare("INSERT INTO tipo_produto (descricao, imposto) VALUES (:descricao, :imposto)");
+        $sth = $pdo->prepare("INSERT INTO produto (descricao, codigo_tipo, valor) VALUES (:descricao, :codigo_tipo, :valor)");
         try {
             $sth->bindValue('descricao', $body['descricao']);
-            $sth->bindValue('imposto', $body['imposto']);
+            $sth->bindValue('codigo_tipo', $body['codigo_tipo']);
+            $sth->bindValue('valor', $body['valor']);
             $sth->execute();
         } catch(\PDOException $e) {
             return $e->getMessage();
@@ -49,17 +50,18 @@ class TipoProdutoController {
                 return "Informe um código";
             }
 
-            self::validaParametros($body);
+            self::validaParametros($body, $pdo);
         } catch(\Exception $e) {
             throw new Exception('Informe parâmetros válidos', 400);
         }
 
 
-        $sth = $pdo->prepare("UPDATE tipo_produto SET descricao = :descricao, imposto = :imposto WHERE codigo = :codigo");
+        $sth = $pdo->prepare("UPDATE produto SET descricao = :descricao, codigo_tipo = :codigo_tipo, valor = :valor WHERE codigo = :codigo");
         try {
             $sth->bindValue('codigo', $body['codigo']);
             $sth->bindValue('descricao', $body['descricao']);
-            $sth->bindValue('imposto', $body['imposto']);
+            $sth->bindValue('codigo_tipo', $body['codigo_tipo']);
+            $sth->bindValue('valor', $body['valor']);
             $sth->execute();
         } catch(\PDOException $e) {
             return $e->getMessage();
@@ -88,7 +90,7 @@ class TipoProdutoController {
         }
 
 
-        $sth = $pdo->prepare("DELETE FROM tipo_produto WHERE codigo = :codigo");
+        $sth = $pdo->prepare("DELETE FROM produto WHERE codigo = :codigo");
         try {
             $sth->bindValue('codigo', $query['codigo']);
             $sth->execute();
@@ -106,8 +108,13 @@ class TipoProdutoController {
     public static function all() {
         $pdo = \App\Persistence\ConnectionCreator::createConnection();
 
-        $sth = $pdo->prepare("SELECT * FROM tipo_produto ORDER BY codigo DESC");
-        
+        $sth = $pdo->prepare("SELECT 
+            p.*,
+            p.valor as valor_unitario,
+            tp.imposto as imposto_unitario
+        FROM produto p 
+        LEFT JOIN tipo_produto tp ON p.codigo_tipo = tp.codigo
+        ORDER BY p.codigo DESC");
         try {
             $sth->execute();
         } catch(\PDOException $e) {
@@ -119,14 +126,26 @@ class TipoProdutoController {
         return $result;
     }
 
-    private static function validaParametros($body) {
+    private static function validaParametros($body, $pdo) {
         try {
-            if (!isset($body['descricao'])) {
-                return "Informe a descrição do tipo";
+            $sth = $pdo->prepare("SELECT * FROM tipo_produto WHERE codigo = :codigo_tipo");
+            try {
+                $sth->bindValue('codigo_tipo', $body['codigo_tipo']);
+                $sth->execute();
+            } catch(\PDOException $e) {
+                return $e->getMessage();
             }
 
-            if (!isset($body['imposto'])) {
-                return "Informe o valor do imposto";
+            if (!($sth->rowCount() > 0)) {
+                return "Informe um tipo válido";
+            }
+
+            if (!isset($body['descricao'])) {
+                return "Informe a descrição do produto";
+            }
+
+            if (!isset($body['valor'])) {
+                return "Informe o valor do produto";
             }
         } catch(\Exception $e) {
             throw new Exception('Informe parâmetros válidos', 400);

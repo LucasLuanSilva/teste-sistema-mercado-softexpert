@@ -39,9 +39,9 @@ class Request {
      */
     public function __construct() {
         $this->queryParams = $_GET ?? [];
-        $this->body = json_decode(file_get_contents('php://input')) ?? [];
+        $this->body = json_decode(file_get_contents('php://input'), true) ?? [];
         $this->headers = getallheaders();
-        $this->httpMethod = $_SERVER['REQUEST_METHOD'] ?? '';
+        $this->httpMethod = ($_SERVER['REQUEST_METHOD'] == 'OPTIONS' ? 'DELETE' : $_SERVER['REQUEST_METHOD']) ?? '';
         $this->uri = $_SERVER['REQUEST_URI'] ?? '';
     }
 

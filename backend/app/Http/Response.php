@@ -62,7 +62,7 @@ class Response {
      * Método responsável por enviar os headers pro navegador
      */
     private function sendHeaders() {
-        http_response_code($this->httpCode);
+        http_response_code($this->httpCode == 55000 ? 200 : $this->httpCode);
 
         foreach ($this->headers as $key=>$value) {
             header($key.': '.$value);
